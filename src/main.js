@@ -37,7 +37,7 @@ async function fetchAndRenderPhotos(query, page) {
         if (page * PER_PAGE >= imagesData.totalHits) {
             loadMoreBtn.classList.add('is-hidden');
             iziToast.show({
-                message: 'No more images to load',
+                message: 'We are sorry, but you have reached the end of search results.',
                 position: 'topRight',
                 color: '#EF4040',
             });
