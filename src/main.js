@@ -28,11 +28,10 @@ async function fetchAndRenderPhotos(query, page) {
                 position: 'topRight',
                 color: '#EF4040',
             });
-            return;
+            return false;
         }
 
         galleryEl.insertAdjacentHTML('beforeend', createGalleryMarkup(imagesData.hits));
-
         lightbox.refresh();
 
         if (page * PER_PAGE >= imagesData.totalHits) {
@@ -45,6 +44,7 @@ async function fetchAndRenderPhotos(query, page) {
         } else {
             loadMoreBtn.classList.remove('is-hidden');
         }
+        return true; // indicate successful fetch and render
     } catch (error) {
         console.log(error);
         iziToast.error({
@@ -53,6 +53,7 @@ async function fetchAndRenderPhotos(query, page) {
             position: 'topRight',
             color: '#EF4040',
         });
+        return false; // indicate failure
     } finally {
         loaderEl.classList.add('is-hidden');
     }
@@ -78,7 +79,6 @@ function onSearchFormSubmit(event) {
     currentPage = 1;
     galleryEl.innerHTML = '';
     loaderEl.classList.remove('is-hidden');
-
     fetchAndRenderPhotos(currentQuery, currentPage);
     event.target.reset();
 }
@@ -99,8 +99,11 @@ const smoothScrollOnLoadMore = () => {
 function onLoadMoreBtnClick() {
     currentPage += 1;
     loaderEl.classList.remove('is-hidden');
-    smoothScrollOnLoadMore();
-    fetchAndRenderPhotos(currentQuery, currentPage);
+    fetchAndRenderPhotos(currentQuery, currentPage).then((success) => {
+        if (success) {
+            smoothScrollOnLoadMore();
+        }
+    });
 }
 
 searchForm.addEventListener('submit', onSearchFormSubmit);
