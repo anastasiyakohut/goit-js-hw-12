@@ -14,6 +14,7 @@ const loadMoreBtn = document.querySelector('.load-more-btn');
 
 let currentPage = 1;
 let currentQuery = '';
+const lightbox = new SimpleLightbox('.gallery a');
 
 async function fetchAndRenderPhotos(query, page) {
     try {
@@ -21,6 +22,7 @@ async function fetchAndRenderPhotos(query, page) {
         loaderEl.classList.add('is-hidden');
 
         if (imagesData.totalHits === 0) {
+            loadMoreBtn.classList.add('is-hidden');
             iziToast.show({
                 message: 'Sorry, there are no images matching your search query. Please try again!',
                 position: 'topRight',
@@ -31,7 +33,6 @@ async function fetchAndRenderPhotos(query, page) {
 
         galleryEl.insertAdjacentHTML('beforeend', createGalleryMarkup(imagesData.hits));
 
-        const lightbox = new SimpleLightbox('.gallery a');
         lightbox.refresh();
 
         if (page * PER_PAGE >= imagesData.totalHits) {
@@ -79,13 +80,26 @@ function onSearchFormSubmit(event) {
     loaderEl.classList.remove('is-hidden');
 
     fetchAndRenderPhotos(currentQuery, currentPage);
-
     event.target.reset();
 }
+
+const smoothScrollOnLoadMore = () => {
+    const lastPhoto = document.querySelector('.gallery .item-list:last-child');
+    if (lastPhoto) {
+        const photoHeight = lastPhoto.getBoundingClientRect().height;
+        const scrollAmount = photoHeight * 2;
+        window.scrollBy({
+            top: scrollAmount,
+            left: 0,
+            behavior: 'smooth',
+        });
+    }
+};
 
 function onLoadMoreBtnClick() {
     currentPage += 1;
     loaderEl.classList.remove('is-hidden');
+    smoothScrollOnLoadMore();
     fetchAndRenderPhotos(currentQuery, currentPage);
 }
 
